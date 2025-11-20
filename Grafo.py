@@ -121,12 +121,13 @@ class Grafo:
 
         d[s] = 0
 
-        for u in range(self._V):
-            for v in range( self._V):
-                if self._matriz_adjacencia[u][v] != 0:
-                    if d[v] > d[u] + self._matriz_adjacencia[u][v]:
-                        d[v] =d[u] + self._matriz_adjacencia[u][v]
-                        pi[v] = u
+        for _ in range(self._V - 1):
+            for u in range(self._V):
+                for v in range( self._V):
+                    if self._matriz_adjacencia[u][v] != 0:
+                        if d[v] > d[u] + self._matriz_adjacencia[u][v]:
+                            d[v] =d[u] + self._matriz_adjacencia[u][v]
+                            pi[v] = u
         
         return (d, pi)
         
