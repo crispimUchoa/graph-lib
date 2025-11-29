@@ -152,7 +152,8 @@ class Grafo:
 
         return (d, pi)
         
-    def 
+    def coloracao_propria(self):
+        ...
 
     def desenhar_grafo(self):
         import matplotlib.pyplot as plt
