@@ -152,6 +152,45 @@ class Grafo:
 
         return (d, pi)
         
+    def 
+
+    def desenhar_grafo(self):
+        import matplotlib.pyplot as plt
+        import math
+        n = len(self._matriz_adjacencia)
+
+        # --- Layout circular ---
+        R = 1.0
+        coords = [
+            (R*math.cos(2*math.pi*i/n), R*math.sin(2*math.pi*i/n))
+            for i in range(n)
+        ]
+
+        # --- Arestas ---
+        for i in range(n):
+            for j in range(i+1, n):
+                if self._matriz_adjacencia[i][j] != 0:
+                    x1, y1 = coords[i]
+                    x2, y2 = coords[j]
+                    plt.plot([x1, x2], [y1, y2], linewidth=1, color="black")
+
+        # --- Nós ---
+        xs = [coord[0] for coord in coords]
+        ys = [coord[1] for coord in coords]
+
+        plt.scatter(xs, ys, s=600, color="white", edgecolors="black")
+
+        # --- Rótulos ---
+        for i, (x, y) in enumerate(coords):
+            plt.text(x, y, str(i), ha='center', va='center', fontsize=12)
+
+        plt.axis('equal')
+        plt.axis('off')
+        plt.show()
+
+
+
+    
 grafo = Grafo(12)
 grafo.adicionar_aresta(0, 1)
 grafo.adicionar_aresta(1, 2)
@@ -170,4 +209,3 @@ grafo.adicionar_aresta(11,9)
 # grafo.mostrar_matriz()
 
 print(grafo.dijkstra(0))
-
