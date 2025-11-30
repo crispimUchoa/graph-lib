@@ -5,7 +5,7 @@ class MinHeap: #Heap de mínimo de vértices com base em sua distância de s
         self.heap = list(range(V))
         self.constroi_heap()
 
-    def swap(self, i, j):
+    def troca(self, i, j): #troca a posição de dois elementos no heap
         self.pos[self.heap[i]] = j
         self.pos[self.heap[j]] = i
         self.heap[i], self.heap[j] = self.heap[j], self.heap[i]
@@ -19,7 +19,7 @@ class MinHeap: #Heap de mínimo de vértices com base em sua distância de s
     def pai(self, i:int) -> int: #retorna o pai
          return (i - 1) //2
          
-    def heapify_down(self, i:int):
+    def heapify_down(self, i:int): #desce elemento no heap
         while True:
             esq = self.esq(i)
             dir = self.dir(i)
@@ -33,16 +33,16 @@ class MinHeap: #Heap de mínimo de vértices com base em sua distância de s
 
 
             if menor != i:
-                self.swap(i, menor)
+                self.troca(i, menor)
                 i = menor
             else:
                 break
 
-    def heapify_up(self, i:int):
+    def heapify_up(self, i:int): #sobe elemento no heap
         while i > 0:
             pai = self.pai(i)
             if self.d[self.heap[i]] < self.d[self.heap[pai]]:
-                self.swap(i, pai)
+                self.troca(i, pai)
                 i = pai
             else:
                 break
@@ -57,7 +57,7 @@ class MinHeap: #Heap de mínimo de vértices com base em sua distância de s
             self.heapify_up(i)
 
 
-    def extrai_min(self) -> int:
+    def extrai_min(self) -> int: #remove menor elemento e ajusta o heap
         u = self.heap[0]
         v = self.heap.pop()
 

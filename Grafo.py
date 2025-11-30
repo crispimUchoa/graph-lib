@@ -1,4 +1,6 @@
 from MinHeap import MinHeap
+import matplotlib.pyplot as plt
+import math
 
 class Grafo:
     def __init__(self, V: int, ponderado:bool=False):
@@ -28,7 +30,7 @@ class Grafo:
         return self.__E
 
     def viz(self, v: int) -> list[int]: #retorna vizinhos de v
-        return [vizinho for vizinho in range(self.n()) if self._matriz_adjacencia[v][vizinho] != 0]
+        return [vizinho for vizinho in range(self.n()) if (self._matriz_adjacencia[v][vizinho] != 0 and v != vizinho)]
     
     def d(self, v: int) -> int: #retorna grau de v
         return len(self.viz(v))
@@ -136,7 +138,7 @@ class Grafo:
         
         return (d, pi)
     
-    def dijkstra(self, s:int) -> tuple[list[float], list[int | None]]:
+    def dijkstra(self, s:int) -> tuple[list[float], list[int | None]]: #algoritmo de dijkstra
         d, pi = self.inicializa()
         d[s] = 0
         heap = MinHeap(self.n(), d)
@@ -152,22 +154,38 @@ class Grafo:
 
         return (d, pi)
         
-    def coloracao_propria(self):
-        ...
+    def coloracao_propria(self): #Algoritmo de wesh-powell + verificação de grafo completo
+        n = self.n()
+        
+        V = list(range(n))
+        V.sort(key=lambda v : -self.d(v)) #ordena os vertices por ordem decrescente de grau
+        cor = 1 #inicia a cor 1
+        cores = [ 0 for _ in range(n)] #define cores, cores[i] cor do vertice V[i]
+        
+        while len(V) > 0: #Enquanto houver vértice incolor
+            v = V.pop(0)
+            cores[v] = cor
+            adjancentes = set(self.viz(v))
+            for u in V.copy():
+                if not u in adjancentes:
+                    adjancentes = adjancentes.union(set(self.viz(u)))
+                    cores[u] = cor
+                    V.remove(u)
+            
+            cor +=1
 
-    def desenhar_grafo(self):
-        import matplotlib.pyplot as plt
-        import math
+        return (cores, cor-1)
+        
+
+    def desenhar_grafo(self): #exibe o grafo com matplotlib
         n = len(self._matriz_adjacencia)
 
-        # --- Layout circular ---
         R = 1.0
         coords = [
             (R*math.cos(2*math.pi*i/n), R*math.sin(2*math.pi*i/n))
             for i in range(n)
         ]
 
-        # --- Arestas ---
         for i in range(n):
             for j in range(i+1, n):
                 if self._matriz_adjacencia[i][j] != 0:
@@ -175,13 +193,11 @@ class Grafo:
                     x2, y2 = coords[j]
                     plt.plot([x1, x2], [y1, y2], linewidth=1, color="black")
 
-        # --- Nós ---
         xs = [coord[0] for coord in coords]
         ys = [coord[1] for coord in coords]
 
         plt.scatter(xs, ys, s=600, color="white", edgecolors="black")
 
-        # --- Rótulos ---
         for i, (x, y) in enumerate(coords):
             plt.text(x, y, str(i), ha='center', va='center', fontsize=12)
 
@@ -192,21 +208,29 @@ class Grafo:
 
 
     
-grafo = Grafo(12)
+# grafo = Grafo(12)
+# grafo.adicionar_aresta(0, 1)
+# grafo.adicionar_aresta(1, 2)
+# grafo.adicionar_aresta(1, 3)
+# grafo.adicionar_aresta(3, 4)
+# grafo.adicionar_aresta(4, 10)
+# grafo.adicionar_aresta(4, 9)
+# grafo.adicionar_aresta(4, 5)
+# grafo.adicionar_aresta(5, 6)
+# grafo.adicionar_aresta(6, 7)
+# grafo.adicionar_aresta(6, 8)
+# grafo.adicionar_aresta(10, 11)
+# grafo.adicionar_aresta(11,9)
+grafo = Grafo(4)
+
 grafo.adicionar_aresta(0, 1)
+grafo.adicionar_aresta(0, 2)
+grafo.adicionar_aresta(0, 3)
 grafo.adicionar_aresta(1, 2)
 grafo.adicionar_aresta(1, 3)
-grafo.adicionar_aresta(3, 4)
-grafo.adicionar_aresta(4, 10)
-grafo.adicionar_aresta(4, 9)
-grafo.adicionar_aresta(4, 5)
-grafo.adicionar_aresta(5, 6)
-grafo.adicionar_aresta(6, 7)
-grafo.adicionar_aresta(6, 8)
-grafo.adicionar_aresta(10, 11)
-grafo.adicionar_aresta(11,9)
-
+grafo.adicionar_aresta(2, 3)
 
 # grafo.mostrar_matriz()
 
-print(grafo.dijkstra(0))
+print(grafo.coloracao_propria())
+grafo.desenhar_grafo()
