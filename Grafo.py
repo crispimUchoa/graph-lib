@@ -29,14 +29,15 @@ class Grafo:
     def m(self) -> int: #retorna numero de arestas
         return self.__E
 
+    def w(self, u:int, v:int) -> float: #retorna peso de uv
+        return self._matriz_adjacencia[u][v]
+    
     def viz(self, v: int) -> list[int]: #retorna vizinhos de v
-        return [vizinho for vizinho in range(self.n()) if (self._matriz_adjacencia[v][vizinho] != 0 and v != vizinho)]
+        return [vizinho for vizinho in range(self.n()) if (self.w(v, vizinho) != 0 and v != vizinho)]
     
     def d(self, v: int) -> int: #retorna grau de v
         return len(self.viz(v))
 
-    def w(self, u:int, v:int) -> float: #retorna peso de uv
-        return self._matriz_adjacencia[u][v]
     
     def mind(self) -> int: #retorna grau mínimo de G
         minimo = 0
@@ -73,9 +74,9 @@ class Grafo:
         return (d, pi, cor)
     
     def relaxa(self, u: int, v: int, d: list[float], pi: list[int | None]) -> bool: #Relaxa a aresta -> retorna verdadeiro se relaxou
-        if self._matriz_adjacencia[u][v] != 0:
-            if d[v] > d[u] + self._matriz_adjacencia[u][v]:
-                d[v] =d[u] + self._matriz_adjacencia[u][v]
+        if self.w(u, v) != 0:
+            if d[v] > d[u] + self.w(u, v):
+                d[v] =d[u] + self.w(u, v)
                 pi[v] = u
                 return True
             
@@ -96,7 +97,7 @@ class Grafo:
             for v in self.viz(u): #percorre todos os vizinhos de u
                 if cor[v] == 'Branco':
                     cor[v] = 'Cinza'
-                    d[v] = d[u] + self._matriz_adjacencia[u][v]
+                    d[v] = d[u] + self.w(u, v)
                     pi[v] = u
                     Q.append(v)
             cor[u] = 'Preto'
@@ -188,7 +189,7 @@ class Grafo:
 
         for i in range(n):
             for j in range(i+1, n):
-                if self._matriz_adjacencia[i][j] != 0:
+                if self.w(i, j) != 0:
                     x1, y1 = coords[i]
                     x2, y2 = coords[j]
                     plt.plot([x1, x2], [y1, y2], linewidth=1, color="black")
