@@ -1,4 +1,6 @@
 from Grafo import Grafo
+import matplotlib.pyplot as plt
+import numpy as np
 
 class Digrafo(Grafo):
     def __init__(self, V: int, ponderado: bool = False):
@@ -64,6 +66,50 @@ class Digrafo(Grafo):
         cor[v] = 'Preto'
         return tempo
 
+    def desenhar_grafo(self):
+
+        num_vertices = self.n()
+
+        # Gerar posições circulares para os vértices
+        angulos = np.linspace(0, 2*np.pi, num_vertices, endpoint=False)
+        pos = {i: (np.cos(a), np.sin(a)) for i, a in enumerate(angulos)}
+
+        fig, ax = plt.subplots(figsize=(6, 6))
+        ax.set_aspect('equal')
+        ax.axis('off')
+
+        # Desenhar vértices
+        for v, (x, y) in pos.items():
+            ax.scatter(x, y, s=500, color='white', edgecolor='black', zorder=3)
+            ax.text(x, y, str(v), ha='center', va='center', fontsize=12)
+
+        # Desenhar arestas (percorrendo a matriz)
+        for u in range(num_vertices):
+            for v in range(num_vertices):
+                w = self.w(u, v)
+                if w != 0:  # existe aresta u -> v
+                    x1, y1 = pos[u]
+                    x2, y2 = pos[v]
+
+                    dx = x2 - x1
+                    dy = y2 - y1
+
+                    # Seta
+                    ax.arrow(
+                        x1, y1,
+                        dx * 0.75, dy * 0.75,
+                        head_width=0.07,
+                        length_includes_head=True,
+                        fc='black', ec='black'
+                    )
+
+                    # Texto do peso
+                    xm = (x1 + x2) / 2
+                    ym = (y1 + y2) / 2
+                    ax.text(xm, ym, str(w), fontsize=10, color='red')
+
+        plt.show()
+
 if __name__ == '__main__':
     digrafo = Digrafo(11, True)
     digrafo.adicionar_aresta(0, 1, 15)
@@ -110,3 +156,5 @@ if __name__ == '__main__':
 
     cores, k = digrafo.coloracao_propria()
     print(f'{cores=}\n{k=}')
+
+    digrafo.desenhar_grafo()
