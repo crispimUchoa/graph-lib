@@ -4,8 +4,8 @@ import math
 
 class Grafo:
     def __init__(self, V: int, ponderado:bool=False):
-        self.__V: int = V #número de vertices 
-        self.__E: int = 0 #número de arestas
+        self._V: int = V #número de vertices 
+        self._E: int = 0 #número de arestas
         self._ponderado: bool = ponderado
         self._matriz_adjacencia:list[list[float]] = [[0] * V for _ in range(V)] #cria matriz de adjacências para 0 arestas
         
@@ -21,13 +21,13 @@ class Grafo:
         self._matriz_adjacencia[u][v] = peso
         self._matriz_adjacencia[v][u] = peso
 
-        self.__E+=1 #atualiza numero de arestas
+        self._E+=1 #atualiza numero de arestas
     
     def n(self) -> int: #retorna numero de vertices
-        return self.__V
+        return self._V
     
     def m(self) -> int: #retorna numero de arestas
-        return self.__E
+        return self._E
 
     def w(self, u:int, v:int) -> float: #retorna peso de uv
         return self._matriz_adjacencia[u][v]
@@ -105,14 +105,14 @@ class Grafo:
         return (d, pi)
     
 
-    def __busca_dfs(self, v:int, tempo:int, ini:list[int], fim:list[int], cor: list[str], pi:list[int | None]): #Faz a busca recursiva a partir de v
+    def _busca_dfs(self, v:int, tempo:int, ini:list[int], fim:list[int], cor: list[str], pi:list[int | None]): #Faz a busca recursiva a partir de v
         tempo +=1
         ini[v] = tempo
         cor[v] = 'Cinza'
         for u in self.viz(v):
             if cor[u] == 'Branco':
                 pi[u] = v
-                tempo = self.__busca_dfs(u, tempo, ini, fim, cor, pi)
+                tempo = self._busca_dfs(u, tempo, ini, fim, cor, pi)
         tempo+=1
         fim[v] = tempo
         cor[v] = 'Preto'
@@ -122,7 +122,7 @@ class Grafo:
         ini:list[int] = [-1]*self.n()
         fim:list[int] = [-1]*self.n()
         pi, cor = self.inicializa_busca()[1:]
-        self.__busca_dfs(s, 0, ini, fim, cor,  pi) #Realiza a busca a partir de s
+        self._busca_dfs(s, 0, ini, fim, cor,  pi) #Realiza a busca a partir de s
 
         return (pi, ini, fim)
         
