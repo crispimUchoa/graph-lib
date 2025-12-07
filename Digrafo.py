@@ -11,15 +11,22 @@ class Digrafo(Grafo):
         if not self._ponderado:
             peso = 1   
 
-        self._matriz_adjacencia[u][v] = peso
+        self._list_adjacencia[u].append((v, peso))
 
         self._E +=1
 
     def viz_saida(self, v:int) -> list[int]:
-        return [vizinho for vizinho in range(self.n()) if (self.w(v, vizinho) != 0 and v != vizinho)]
+        return [u for u, _ in self._list_adjacencia[v]]
     
     def viz_entrada(self, v:int) -> list[int]:
-        return [vizinho for vizinho in range(self.n()) if (self.w(vizinho, v) != 0 and v != vizinho)]
+        vizinhos = []
+        for u in range(self.n()):
+            for (vi, w) in self._list_adjacencia[u]:
+                if vi == v:
+                    vizinhos.append(u)
+                    break
+    
+        return vizinhos
 
     def viz(self, v: int) -> list[int]:
         vizinhos = self.viz_entrada(v) + self.viz_saida(v)
@@ -129,7 +136,7 @@ if __name__ == '__main__':
     digrafo.adicionar_aresta(9, 6, 2)
     digrafo.adicionar_aresta(10, 9, 1)
 
-    digrafo.mostrar_matriz()
+    digrafo.mostrar_lista()
 
     v = 0
     print('\n----------- BFS ----------\n')
@@ -157,4 +164,6 @@ if __name__ == '__main__':
     cores, k = digrafo.coloracao_propria()
     print(f'{cores=}\n{k=}')
 
-    digrafo.desenhar_grafo()
+    # digrafo.desenhar_grafo()
+
+    print(digrafo.mind())

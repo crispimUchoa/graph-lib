@@ -7,20 +7,26 @@ class Grafo:
         self._V: int = V #número de vertices 
         self._E: int = 0 #número de arestas
         self._ponderado: bool = ponderado
-        self._matriz_adjacencia:list[list[float]] = [[0] * V for _ in range(V)] #cria matriz de adjacências para 0 arestas
+        # self._matriz_adjacencia:list[list[int]] = [[0] * V for _ in range(V)] #cria matriz de adjacências para 0 arestas
+        self._list_adjacencia: list[list[tuple[int, int]]] = [[] for _ in range(V)]
         
 
-    def mostrar_matriz(self):
-        print(*self._matriz_adjacencia, sep='\n')
+    # def mostrar_matriz(self):
+    #     print(*self._matriz_adjacencia, sep='\n')
+
+    def mostrar_lista(self):
+        for i in range(self._V):
+            print(i, '->', self._list_adjacencia[i])
 
     def adicionar_aresta(self, u:int, v:int, w:int=1):#adiciona aresta e atualiza matriz de adjacências
         peso = w
         if not self._ponderado:
             peso = 1   
 
-        self._matriz_adjacencia[u][v] = peso
-        self._matriz_adjacencia[v][u] = peso
-
+        # self._matriz_adjacencia[u][v] = peso
+        # self._matriz_adjacencia[v][u] = peso
+        self._list_adjacencia[u].append((v, peso))
+        self._list_adjacencia[v].append((u, peso))
         self._E+=1 #atualiza numero de arestas
     
     def n(self) -> int: #retorna numero de vertices
@@ -29,18 +35,24 @@ class Grafo:
     def m(self) -> int: #retorna numero de arestas
         return self._E
 
-    def w(self, u:int, v:int) -> float: #retorna peso de uv
-        return self._matriz_adjacencia[u][v]
+    def w(self, u:int, v:int) -> int: #retorna peso de uv
+        # return self._matriz_adjacencia[u][v]
+        for vi, wi in self._list_adjacencia[u]:
+            if vi == v:
+                return wi
+        return 0
     
     def viz(self, v: int) -> list[int]: #retorna vizinhos de v
-        return [vizinho for vizinho in range(self.n()) if (self.w(v, vizinho) != 0 and v != vizinho)]
+        # return [vizinho for vizinho in range(self.n()) if (self.w(v, vizinho) != 0 and v != vizinho)]
+        return [u for u, _ in self._list_adjacencia[v]]
     
     def d(self, v: int) -> int: #retorna grau de v
+        print(f'Calculando grau de {v}... {v}/{self.n()}')
         return len(self.viz(v))
 
     
     def mind(self) -> int: #retorna grau mínimo de G
-        minimo = 0
+        minimo = self.d(0)
         for v in range(self.n()): #percorre todos os vertices calculando seus graus
             d = self.d(v)
             if d < minimo:
@@ -49,7 +61,7 @@ class Grafo:
         return minimo
 
     def maxd(self) -> int: #retorna grau máximo de G
-        maximo = 0
+        maximo = self.d(0)
         for v in range(self.n()):
             d = d(v)
             if d > maximo:
@@ -178,60 +190,82 @@ class Grafo:
         return (cores, cor-1)
         
 
-    def desenhar_grafo(self): #exibe o grafo com matplotlib
-        n = len(self._matriz_adjacencia)
+    # def desenhar_grafo(self): #exibe o grafo com matplotlib
+    #     n = len(self._matriz_adjacencia)
 
-        R = 1.0
-        coords = [
-            (R*math.cos(2*math.pi*i/n), R*math.sin(2*math.pi*i/n))
-            for i in range(n)
-        ]
+    #     R = 1.0
+    #     coords = [
+    #         (R*math.cos(2*math.pi*i/n), R*math.sin(2*math.pi*i/n))
+    #         for i in range(n)
+    #     ]
 
-        for i in range(n):
-            for j in range(i+1, n):
-                if self.w(i, j) != 0:
-                    x1, y1 = coords[i]
-                    x2, y2 = coords[j]
-                    plt.plot([x1, x2], [y1, y2], linewidth=1, color="black")
+    #     for i in range(n):
+    #         for j in range(i+1, n):
+    #             if self.w(i, j) != 0:
+    #                 x1, y1 = coords[i]
+    #                 x2, y2 = coords[j]
+    #                 plt.plot([x1, x2], [y1, y2], linewidth=1, color="black")
 
-        xs = [coord[0] for coord in coords]
-        ys = [coord[1] for coord in coords]
+    #     xs = [coord[0] for coord in coords]
+    #     ys = [coord[1] for coord in coords]
 
-        plt.scatter(xs, ys, s=600, color="white", edgecolors="black")
+    #     plt.scatter(xs, ys, s=600, color="white", edgecolors="black")
 
-        for i, (x, y) in enumerate(coords):
-            plt.text(x, y, str(i), ha='center', va='center', fontsize=12)
+    #     for i, (x, y) in enumerate(coords):
+    #         plt.text(x, y, str(i), ha='center', va='center', fontsize=12)
 
-        plt.axis('equal')
-        plt.axis('off')
-        plt.show()
+    #     plt.axis('equal')
+    #     plt.axis('off')
+    #     plt.show()
 
 
 
-if __name__ == '__main__': 
-    # grafo = Grafo(12)
-    # grafo.adicionar_aresta(0, 1)
-    # grafo.adicionar_aresta(1, 2)
-    # grafo.adicionar_aresta(1, 3)
-    # grafo.adicionar_aresta(3, 4)
-    # grafo.adicionar_aresta(4, 10)
-    # grafo.adicionar_aresta(4, 9)
-    # grafo.adicionar_aresta(4, 5)
-    # grafo.adicionar_aresta(5, 6)
-    # grafo.adicionar_aresta(6, 7)
-    # grafo.adicionar_aresta(6, 8)
-    # grafo.adicionar_aresta(10, 11)
-    # grafo.adicionar_aresta(11,9)
-    grafo = Grafo(4)
+if __name__ == '__main__':
+    grafo = Grafo(11, True)
+    grafo.adicionar_aresta(0, 1, 15)
+    grafo.adicionar_aresta(0, 7, 1)
+    grafo.adicionar_aresta(1, 2, 3)
+    grafo.adicionar_aresta(2, 3, 4)
+    grafo.adicionar_aresta(4, 3, 7)
+    grafo.adicionar_aresta(4, 1, 1)
+    grafo.adicionar_aresta(5, 4, 1)
+    grafo.adicionar_aresta(6, 1, 6)
+    grafo.adicionar_aresta(6, 5, 1)
+    grafo.adicionar_aresta(7, 6, 8)
+    grafo.adicionar_aresta(7, 8, 5)
+    grafo.adicionar_aresta(7, 10, 3)
+    grafo.adicionar_aresta(8, 0, 4)
+    grafo.adicionar_aresta(9, 6, 2)
+    grafo.adicionar_aresta(10, 9, 1)
 
-    grafo.adicionar_aresta(0, 1)
-    grafo.adicionar_aresta(0, 2)
-    grafo.adicionar_aresta(0, 3)
-    grafo.adicionar_aresta(1, 2)
-    grafo.adicionar_aresta(1, 3)
-    grafo.adicionar_aresta(2, 3)
+    grafo.mostrar_lista()
 
-    # grafo.mostrar_matriz()
+    v = 0
+    print('\n----------- BFS ----------\n')
 
-    print(grafo.coloracao_propria())
-    grafo.desenhar_grafo()
+    d_bfs, pi_bfs = grafo.bfs(v)
+    print(f'{d_bfs=}\n{pi_bfs=}')
+
+    print('\n----------- DFS ----------\n')
+
+    pi_dfs, ini_dfs, fim_dfs = grafo.dfs(v)
+    print(f'{pi_dfs=}\n{ini_dfs=}\n{fim_dfs=}')
+
+    print('\n----------- Bellman-Ford ----------\n')
+
+    d_bf, pi_bf = grafo.bf(v)
+    print(f'{d_bf=}\n{pi_bf=}')
+
+    print('\n----------- Djikstra ----------\n')
+
+    d_dijkstra, pi_dijkstra = grafo.dijkstra(v)
+    print(f'{d_dijkstra=}\n{pi_dijkstra=}')
+
+    print('\n----------- Coloração ----------\n')
+
+    cores, k = grafo.coloracao_propria()
+    print(f'{cores=}\n{k=}')
+
+    # grafo.desenhar_grafo()
+
+    print(grafo.mind())
