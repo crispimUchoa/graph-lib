@@ -27,8 +27,6 @@ class Digrafo(Grafo):
     def viz(self, v: int) -> list[int]:
         return list(set(self.viz_entrada(v)) | set(self.viz_saida(v)))
 
-        
-        return list(set(vizinhos))
 
     def d_saida(self, v:int) -> int:
         return len(self.viz_saida(v))
