@@ -109,7 +109,6 @@ class Digrafo(Grafo):
                         ciclos.append(ciclo)
 
             else:
-                # Finalizando v
                 cor[v] = 'Preto'
                 tempo += 1
                 fim[v] = tempo
