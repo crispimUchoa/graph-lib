@@ -1,10 +1,12 @@
 from Grafo import Grafo
 import matplotlib.pyplot as plt
 import numpy as np
+from copy import deepcopy
 
 class Digrafo(Grafo):
     def __init__(self, V: int, ponderado: bool = False):
         super().__init__(V, ponderado)
+        self._list_adjacencia_entrada = deepcopy(self._list_adjacencia)
 
     def adicionar_aresta(self, u: int, v: int, w: int = 1): #aresta de u -> v
         peso = w
@@ -12,6 +14,7 @@ class Digrafo(Grafo):
             peso = 1   
 
         self._list_adjacencia[u].append((v, peso))
+        self._list_adjacencia_entrada[v].append((u, peso))
 
         self._E +=1
 
@@ -19,17 +22,11 @@ class Digrafo(Grafo):
         return [u for u, _ in self._list_adjacencia[v]]
     
     def viz_entrada(self, v:int) -> list[int]:
-        vizinhos = []
-        for u in range(self.n()):
-            for (vi, w) in self._list_adjacencia[u]:
-                if vi == v:
-                    vizinhos.append(u)
-                    break
-    
-        return vizinhos
+        return [u for u, _ in self._list_adjacencia_entrada[v]]
 
     def viz(self, v: int) -> list[int]:
-        vizinhos = self.viz_entrada(v) + self.viz_saida(v)
+        return list(set(self.viz_entrada(v)) | set(self.viz_saida(v)))
+
         
         return list(set(vizinhos))
 
@@ -38,6 +35,9 @@ class Digrafo(Grafo):
     
     def d_entrada(self, v:int) -> int:
         return len(self.viz_entrada(v))
+
+    def d(self, v:int) -> int:
+        return self.d_entrada(v) + self.d_saida(v)
 
     def bfs(self, s: int) -> tuple[list[float], list[int|None]]: #Busca em largura
         d, pi, cor = self.inicializa_busca()
@@ -72,6 +72,51 @@ class Digrafo(Grafo):
         fim[v] = tempo
         cor[v] = 'Preto'
         return tempo
+
+    def dfs(self, s: int): #Iterativo
+
+        ini = [-1] * self.n()
+        fim = [-1] * self.n()
+        pi, cor = self.inicializa_busca()[1:]
+        ciclos = []
+
+        pilha = [(s, 0)]  # (vértice, índice do vizinho)
+        tempo = 0
+
+        while pilha:
+            v, idx = pilha.pop()
+
+            if idx == 0:
+                # Primeira vez que vemos v
+                tempo += 1
+                ini[v] = tempo
+                cor[v] = 'Cinza'
+
+            viz = self.viz_saida(v)
+
+            if idx < len(viz):
+                u = viz[idx]
+
+                # Reempilha v para continuar depois do vizinho idx
+                pilha.append((v, idx + 1))
+
+                if cor[u] == 'Branco':
+                    pi[u] = v
+                    pilha.append((u, 0))
+
+                elif cor[u] == 'Cinza':
+                    # Tentou voltar para um vértice já visitado, um ciclo
+                    ciclo = self._reconstruir_ciclo(v, u, pi)
+                    if len(ciclo) == 10:
+                        ciclos.append(ciclo)
+
+            else:
+                # Finalizando v
+                cor[v] = 'Preto'
+                tempo += 1
+                fim[v] = tempo
+
+        return pi, ini, fim, ciclos
 
     def desenhar_grafo(self):
 
@@ -146,7 +191,7 @@ if __name__ == '__main__':
 
     print('\n----------- DFS ----------\n')
 
-    pi_dfs, ini_dfs, fim_dfs = digrafo.dfs(v)
+    pi_dfs, ini_dfs, fim_dfs, ciclo = digrafo.dfs(v)
     print(f'{pi_dfs=}\n{ini_dfs=}\n{fim_dfs=}')
 
     print('\n----------- Bellman-Ford ----------\n')

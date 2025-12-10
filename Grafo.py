@@ -1,6 +1,5 @@
 from MinHeap import MinHeap
 import matplotlib.pyplot as plt
-import math
 
 class Grafo:
     def __init__(self, V: int, ponderado:bool=False):
@@ -47,7 +46,6 @@ class Grafo:
         return [u for u, _ in self._list_adjacencia[v]]
     
     def d(self, v: int) -> int: #retorna grau de v
-        print(f'Calculando grau de {v}... {v}/{self.n()}')
         return len(self.viz(v))
 
     
@@ -63,7 +61,7 @@ class Grafo:
     def maxd(self) -> int: #retorna grau máximo de G
         maximo = self.d(0)
         for v in range(self.n()):
-            d = d(v)
+            d = self.d(v)
             if d > maximo:
                 maximo = d
         
@@ -130,14 +128,75 @@ class Grafo:
         cor[v] = 'Preto'
         return tempo
 
-    def dfs(self, s:int) -> tuple[list[int | None], list[int], list[int]]: #busca em profundidade
+    def dfs_recursivo(self, s:int) -> tuple[list[int | None], list[int], list[int]]: #busca em profundidade
         ini:list[int] = [-1]*self.n()
         fim:list[int] = [-1]*self.n()
         pi, cor = self.inicializa_busca()[1:]
         self._busca_dfs(s, 0, ini, fim, cor,  pi) #Realiza a busca a partir de s
 
         return (pi, ini, fim)
-        
+
+    def _reconstruir_ciclo(self, v, u, pi):
+        ciclo = [u]
+        x = v
+
+        visitados = set([u])
+        while x not in visitados:
+            visitados.add(x)
+            ciclo.append(x)
+            x = pi[x]
+            if x is None:
+                return []
+
+        ciclo.append(x)
+        ciclo.reverse()
+        return ciclo
+
+
+    def dfs(self, s: int): #Iterativo
+
+        ini = [-1] * self.n()
+        fim = [-1] * self.n()
+        pi, cor = self.inicializa_busca()[1:]
+        ciclos = []
+
+        pilha = [(s, 0)]  # (vértice, índice do vizinho)
+        tempo = 0
+
+        while pilha:
+            v, idx = pilha.pop()
+
+            if idx == 0:
+                # Primeira vez que vemos v
+                tempo += 1
+                ini[v] = tempo
+                cor[v] = 'Cinza'
+
+            viz = self.viz(v)
+
+            if idx < len(viz):
+                u = viz[idx]
+
+                # Reempilha v para continuar depois do vizinho idx
+                pilha.append((v, idx + 1))
+
+                if cor[u] == 'Branco':
+                    pi[u] = v
+                    pilha.append((u, 0))
+
+                elif cor[u] == 'Cinza':
+                    # Tentou voltar para um vértice já visitado, um ciclo
+                    ciclo = self._reconstruir_ciclo(v, u, pi)
+                    if len(ciclo) == 10:
+                        ciclos.append(ciclo)
+
+            else:
+                # Finalizando v
+                cor[v] = 'Preto'
+                tempo += 1
+                fim[v] = tempo
+
+        return pi, ini, fim, ciclos
 
     def bf(self, s: int) -> tuple[list[float], list[int | None]]: #Bellman-Ford
         d, pi = self.inicializa()
@@ -156,7 +215,7 @@ class Grafo:
         d[s] = 0
         heap = MinHeap(self.n(), d)
         heap.constroi_heap()
-        while len(heap.heap) > 0:
+        while heap.heap:
             # print(heap.heap)
             u = heap.extrai_min()   
             # print(heap.heap)
@@ -173,17 +232,20 @@ class Grafo:
         V = list(range(n))
         V.sort(key=lambda v : -self.d(v)) #ordena os vertices por ordem decrescente de grau
         cor = 1 #inicia a cor 1
-        cores = [ 0 for _ in range(n)] #define cores, cores[i] cor do vertice V[i]
-        
-        while len(V) > 0: #Enquanto houver vértice incolor
+        cores = [0] * n #define cores, cores[i] cor do vertice V[i]
+        adjancentes =[ set(self.viz(v)) for v in range(n)]
+        nao_coloridos = set(V)
+        while nao_coloridos: #Enquanto houver vértice incolor
             v = V.pop(0)
             cores[v] = cor
-            adjancentes = set(self.viz(v))
-            for u in V.copy():
-                if not u in adjancentes:
-                    adjancentes = adjancentes.union(set(self.viz(u)))
+
+            adjancentes_marcados = adjancentes[v].copy()
+
+            for u in list(nao_coloridos):
+                if not u in adjancentes_marcados:
                     cores[u] = cor
-                    V.remove(u)
+                    nao_coloridos.remove(u)
+                    adjancentes_marcados |= adjancentes[u]
             
             cor +=1
 
@@ -248,7 +310,7 @@ if __name__ == '__main__':
 
     print('\n----------- DFS ----------\n')
 
-    pi_dfs, ini_dfs, fim_dfs = grafo.dfs(v)
+    pi_dfs, ini_dfs, fim_dfs, ciclos = grafo.dfs(v)
     print(f'{pi_dfs=}\n{ini_dfs=}\n{fim_dfs=}')
 
     print('\n----------- Bellman-Ford ----------\n')
